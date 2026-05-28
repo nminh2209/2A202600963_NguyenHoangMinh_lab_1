@@ -175,17 +175,33 @@ def streaming_chatbot() -> None:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "mock-key"))
     history = []
     
+    # ANSI escape codes for terminal UI
+    GREEN = "\033[92m"
+    CYAN = "\033[96m"
+    YELLOW = "\033[93m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+    
+    print(f"\n{YELLOW}╔════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{YELLOW}║ {BOLD}🤖 CHAT SESSION STARTED (Type 'quit' or 'exit' to leave){RESET} {YELLOW}║{RESET}")
+    print(f"{YELLOW}╚════════════════════════════════════════════════════════════╝{RESET}\n")
+    
     while True:
         try:
-            user_input = input("You: ")
+            print(f"{GREEN}╭── {BOLD}👤 You{RESET}{GREEN} ───────────────────────────────────────────────────{RESET}")
+            user_input = input(f"{GREEN}│{RESET} ")
+            print(f"{GREEN}╰────────────────────────────────────────────────────────────{RESET}\n")
             if user_input.lower() in ['quit', 'exit']:
+                print(f"{YELLOW}Goodbye!{RESET}")
                 break
         except (KeyboardInterrupt, EOFError):
+            print(f"\n{YELLOW}Goodbye!{RESET}")
             break
             
         history.append({"role": "user", "content": user_input})
         
-        print("Assistant: ", end="", flush=True)
+        print(f"{CYAN}╭── {BOLD}✨ Assistant{RESET}{CYAN} ─────────────────────────────────────────────{RESET}")
+        print(f"{CYAN}│{RESET} ", end="", flush=True)
         
         response = client.chat.completions.create(
             model=OPENAI_MODEL,
@@ -198,8 +214,10 @@ def streaming_chatbot() -> None:
             if chunk.choices and chunk.choices[0].delta:
                 delta = chunk.choices[0].delta.content or ""
                 assistant_reply += delta
-                print(delta, end="", flush=True)
-        print()
+                # Replace newlines so the left border is maintained
+                delta_str = delta.replace("\n", f"\n{CYAN}│{RESET} ")
+                print(delta_str, end="", flush=True)
+        print(f"\n{CYAN}╰────────────────────────────────────────────────────────────{RESET}\n")
         
         history.append({"role": "assistant", "content": assistant_reply})
         # 3 turns = 6 messages (user + assistant each turn)
