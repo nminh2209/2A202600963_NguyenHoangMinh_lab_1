@@ -202,7 +202,8 @@ def streaming_chatbot() -> None:
         print()
         
         history.append({"role": "assistant", "content": assistant_reply})
-        history = history[-3:]
+        # 3 turns = 6 messages (user + assistant each turn)
+        history = history[-6:]
 
 
 # ---------------------------------------------------------------------------
